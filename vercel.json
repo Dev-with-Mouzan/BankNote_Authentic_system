@@ -2,7 +2,14 @@
   "builds": [
     {
       "src": "src/main.py",
-      "use": "@vercel/python"
+      "use": "@vercel/python",
+      "config": {
+        "includeFiles": [
+          "models/model.pkl",
+          "src/templates/**",
+          "src/static/**"
+        ]
+      }
     }
   ],
   "routes": [
