@@ -32,6 +32,7 @@ import pandas as pd
 model_path = os.path.join(project_root, "models", "model.pkl")
 logger.info(f"Loading model from: {model_path}")
 
+model_error = None
 try:
     if not os.path.exists(model_path):
         logger.error(f"Model file not found at {model_path}")
@@ -39,6 +40,7 @@ try:
     logger.info("Model loaded successfully")
 except Exception as e:
     logger.error(f"Error loading model: {e}")
+    model_error = str(e)
     model = None
 
 
@@ -69,7 +71,7 @@ async def predict(request: PredictRequest):
     if model is None:
         raise HTTPException(
             status_code=500, 
-            detail=f"Model not loaded. Expected path: {model_path}. Exists: {os.path.exists(model_path)}"
+            detail=f"Model not loaded. Error: {model_error}. Path: {model_path}"
         )
     try:
         features = np.array(
