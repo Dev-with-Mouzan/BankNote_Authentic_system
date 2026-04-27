@@ -7,9 +7,15 @@ import joblib
 import numpy as np
 import os
 
+import logging
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 app = FastAPI()
 
 current_dir = os.path.dirname(__file__)
+project_root = os.path.abspath(os.path.join(current_dir, ".."))
 
 app.mount("/static", StaticFiles(directory=os.path.join(current_dir, "static")), name="static")
 
@@ -23,8 +29,17 @@ app.add_middleware(
 
 import pandas as pd
 
-model_path = os.path.abspath(os.path.join(current_dir, "..", "models", "model.pkl"))
-model = joblib.load(model_path)
+model_path = os.path.join(project_root, "models", "model.pkl")
+logger.info(f"Loading model from: {model_path}")
+
+try:
+    if not os.path.exists(model_path):
+        logger.error(f"Model file not found at {model_path}")
+    model = joblib.load(model_path)
+    logger.info("Model loaded successfully")
+except Exception as e:
+    logger.error(f"Error loading model: {e}")
+    model = None
 
 
 class PredictRequest(BaseModel):
@@ -49,6 +64,8 @@ async def root():
 
 @app.post("/predict", response_model=PredictResponse)
 async def predict(request: PredictRequest):
+    if model is None:
+        raise HTTPException(status_code=500, detail="Model not loaded. Check server logs.")
     try:
         features = np.array(
             [[request.variance, request.skewness, request.curtosis, request.entropy]]
