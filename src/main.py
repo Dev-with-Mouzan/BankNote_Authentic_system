@@ -27,7 +27,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-import pandas as pd
+
 
 model_path = os.path.join(project_root, "models", "model.pkl")
 logger.info(f"Loading model from: {model_path}")
