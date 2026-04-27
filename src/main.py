@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, FileResponse
 from pydantic import BaseModel
 import joblib
 import numpy as np
@@ -58,8 +58,10 @@ class PredictResponse(BaseModel):
 @app.get("/")
 async def root():
     html_path = os.path.join(current_dir, "templates", "index.html")
-    with open(html_path, "r") as f:
-        return HTMLResponse(content=f.read())
+    if not os.path.exists(html_path):
+        logger.error(f"Template not found at: {html_path}")
+        return HTMLResponse(content=f"<h1>Error</h1><p>Template not found. Check server logs.</p>", status_code=404)
+    return FileResponse(html_path)
 
 
 @app.post("/predict", response_model=PredictResponse)
