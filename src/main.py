@@ -69,10 +69,7 @@ async def root():
 @app.post("/predict", response_model=PredictResponse)
 async def predict(request: PredictRequest):
     if model is None:
-        raise HTTPException(
-            status_code=500, 
-            detail=f"Model not loaded. Error: {model_error}. Path: {model_path}"
-        )
+        raise HTTPException(status_code=500, detail="Model could not be loaded. Please check deployment logs.")
     try:
         features = np.array(
             [[request.variance, request.skewness, request.curtosis, request.entropy]]
